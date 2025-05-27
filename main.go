@@ -18,7 +18,15 @@ Space between letters: Three time units.
 Space between words: Seven time units.
 */
 
+func open(fname string) (*os.File, error) {
+	if fname == "-" {
+		return os.Stdin, nil
+	}
+	return os.Open(fname)
+}
+
 func main() {
+	fname := flag.String("f", "-", "file to read")
 	fq := flag.Float64("fq", 425.0, "Hz")
 	wpm := flag.Int("wpm", 20, "words per minute")
 	flag.Parse()
@@ -36,8 +44,13 @@ func main() {
 		sine: sine,
 		tick: sr.N(tick),
 	}
+	fd, err := open(*fname)
+	if err != nil {
+		panic(err)
+	}
+	defer fd.Close()
 
-	for v := range read(os.Stdin) {
+	for v := range read(fd) {
 		fmt.Print(string(v))
 		snds := g.convert(v)
 		speaker.PlayAndWait(snds)
