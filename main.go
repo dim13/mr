@@ -35,13 +35,15 @@ func tuneFreq(tick time.Duration, freq float64) float64 {
 }
 
 func main() {
-	fname := flag.String("f", "-", "file to read")
 	freq := flag.Float64("fq", 425.0, "Hz")
+	fname := flag.String("f", "-", "file to read")
+	srate := flag.Int("sr", 48000, "sample rate")
+	bufsz := flag.Int("bs", 4800, "buffer size")
 	wpm := flag.Int("wpm", 20, "words per minute")
 	flag.Parse()
 
-	sr := beep.SampleRate(48000)
-	speaker.Init(sr, 4800)
+	sr := beep.SampleRate(*srate)
+	speaker.Init(sr, *bufsz)
 
 	tick := wpmDuration(*wpm)
 
