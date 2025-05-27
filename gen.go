@@ -8,7 +8,7 @@ import (
 )
 
 type gen struct {
-	sine beep.Streamer
+	wave beep.Streamer
 	tick int
 }
 
@@ -18,9 +18,9 @@ func (g gen) convert(r rune) beep.Streamer {
 		for _, x := range s {
 			switch x {
 			case '-':
-				st = append(st, beep.Take(g.tick*3, g.sine))
+				st = append(st, beep.Take(g.tick*3, g.wave))
 			case '.':
-				st = append(st, beep.Take(g.tick, g.sine))
+				st = append(st, beep.Take(g.tick, g.wave))
 			}
 			st = append(st, generators.Silence(g.tick))
 		}

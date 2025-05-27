@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 	"os"
+	"time"
 
 	"github.com/gopxl/beep/v2"
 	"github.com/gopxl/beep/v2/generators"
@@ -25,23 +27,32 @@ func open(fname string) (*os.File, error) {
 	return os.Open(fname)
 }
 
+// tuneFreq to full half wave length
+func tuneFreq(tick time.Duration, freq float64) float64 {
+	t := time.Duration(0.5 * float64(time.Second) / freq)
+	n := time.Duration(math.Round(float64(tick) / float64(t)))
+	return 0.5 / (tick / n).Seconds()
+}
+
 func main() {
 	fname := flag.String("f", "-", "file to read")
-	fq := flag.Float64("fq", 425.0, "Hz")
+	freq := flag.Float64("fq", 425.0, "Hz")
 	wpm := flag.Int("wpm", 20, "words per minute")
 	flag.Parse()
 
 	sr := beep.SampleRate(48000)
 	speaker.Init(sr, 4800)
 
-	sine, err := generators.SineTone(sr, *fq)
+	tick := wpmDuration(*wpm)
+	*freq = tuneFreq(tick, *freq)
+
+	wave, err := generators.SineTone(sr, *freq)
 	if err != nil {
 		panic(err)
 	}
 
-	tick := wpmDuration(*wpm)
 	g := gen{
-		sine: sine,
+		wave: wave,
 		tick: sr.N(tick),
 	}
 	fd, err := open(*fname)
