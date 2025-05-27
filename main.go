@@ -29,8 +29,8 @@ func open(fname string) (*os.File, error) {
 
 // tuneFreq to full half wave length
 func tuneFreq(tick time.Duration, freq float64) float64 {
-	t := time.Duration(0.5 * float64(time.Second) / freq)
-	n := time.Duration(math.Round(float64(tick) / float64(t)))
+	t := float64(time.Second/2) / freq
+	n := time.Duration(math.Round(float64(tick) / t))
 	return 0.5 / (tick / n).Seconds()
 }
 
@@ -44,9 +44,8 @@ func main() {
 	speaker.Init(sr, 4800)
 
 	tick := wpmDuration(*wpm)
-	*freq = tuneFreq(tick, *freq)
 
-	wave, err := generators.SineTone(sr, *freq)
+	wave, err := generators.SineTone(sr, tuneFreq(tick, *freq))
 	if err != nil {
 		panic(err)
 	}
